@@ -48,7 +48,7 @@ def iterate(
     """
     #[
 
-    norm_eval = _sp.linalg.norm(self._curr_f, settings["norm"], )
+    norm_eval = _ft.partial(_sp.linalg.norm, ord=settings["norm_order"], )
 
     #]
 
