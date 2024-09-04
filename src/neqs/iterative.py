@@ -1,5 +1,5 @@
 """
-Numerical solver iterator boilerplate
+Iterative numerical solver boilerplate
 """
 
 
