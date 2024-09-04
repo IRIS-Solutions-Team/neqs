@@ -7,8 +7,6 @@ Quasi-Newton step
 import numpy as _np
 import scipy as _sp
 
-from .iterator import (iterate, )
-
 from typing import (TYPE_CHECKING, )
 if TYPE_CHECKING:
     from .iterator import (

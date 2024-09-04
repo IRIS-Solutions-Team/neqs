@@ -1,6 +1,6 @@
 
 import functools as _ft
-from .iterator import iterate
+from .iterative import iterate
 from .quasi_newton import quasi_newton_step
 
 
