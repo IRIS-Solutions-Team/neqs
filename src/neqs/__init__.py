@@ -1,18 +1,13 @@
 
+import functools as _ft
+from .iterator import iterate
+from .quasi_newton import quasi_newton_step
+
+
+quasi_newton = _ft.partial(iterate, step_eval=quasi_newton_step, )
+
 
 import importlib.metadata as _md
-
-
 __version__ = _md.version(__name__)
 __doc__ = _md.metadata(__name__).json["description"]
-
-
-from .quasi_newton import *
-from .quasi_newton import __all__ as quasi_newton_all
-
-
-__all__ = (
-    *quasi_newton_all,
-)
-
 
