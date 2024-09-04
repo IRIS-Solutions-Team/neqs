@@ -7,6 +7,7 @@ Iterative numerical solver boilerplate
 import numpy as _np
 import scipy as _sp
 import enum as _en
+import functools as _ft
 
 from typing import (TYPE_CHECKING, )
 if TYPE_CHECKING:
