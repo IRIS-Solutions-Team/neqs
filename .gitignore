@@ -1,0 +1,12 @@
+__pycache__
+.*_cache
+.pytype
+session
+
+.DS_Store
+.idea/
+env_neqs/dist/
+dist/
+
+.ipynb*
+
