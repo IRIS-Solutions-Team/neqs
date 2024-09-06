@@ -1,12 +1,11 @@
 __pycache__
 .*_cache
 .pytype
+.venv
 session
-
 .DS_Store
-.idea/
-env_neqs/dist/
-dist/
-
+.idea
+.vscode
+env_neqs/dist
+dist
 .ipynb*
-
