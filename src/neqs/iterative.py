@@ -18,6 +18,11 @@ if TYPE_CHECKING:
         Sequence,
     )
 
+STEP_TOL = 1e-4
+FUNC_TOL = 1e-4
+MAX_ITER = 1000
+NORM_ORDER = None
+
 ArrayType = _np.ndarray
 SparseArrayType = _sp.sparse.spmatrix
 FuncEvalType = Callable[[ArrayType], ArrayType]
@@ -25,7 +30,6 @@ JacobEvalType = Callable[[ArrayType], SparseArrayType]
 NormEvalType = Callable[[ArrayType], float]
 SettingsType = dict[str, Any]
 GuessType = dict[str, Any]
-InfoType = int
 StepEvalType = Callable[[GuessType, FuncEvalType, JacobEvalType, SettingsType],
                         ArrayType]
 
@@ -66,22 +70,32 @@ def iterate(
     jacob_eval: JacobEvalType,
     initial_guess: ArrayType,
     settings: SettingsType,
-    *args,
+    args: dict,
     step_eval: StepEvalType,
-) -> tuple[GuessType, InfoType]:
+) -> tuple[GuessType, ExitStatus]:
     """
     """
 
     guess = initial_guess
     prev_guess = guess
-    step_tolerance = settings["step_tolerance"]
-    func_tolerance = settings["func_tolerance"]
-    iter = 0
-    max_iter = settings["max_iterations"]
 
+    # tolerance setting
+    step_tolerance = settings.get("step_tolerance") \
+        if settings.get("step_tolerance") is not None else STEP_TOL
+    func_tolerance = settings.get("func_tolerance") \
+        if settings.get("func_tolerance") is not None else FUNC_TOL
+
+    # tolerance setting
+    iter = 0
+    max_iter = settings.get("max_iterations") \
+        if settings.get("max_iterations") is not None else MAX_ITER
+
+    # norm order setting
+    norm_order = settings.get("norm_order") \
+        if settings.get("norm_order") is not None else NORM_ORDER
     norm_eval = _ft.partial(
         _sp.linalg.norm,
-        ord=settings["norm_order"],
+        ord=norm_order,
     )
 
     while iter <= max_iter:
@@ -90,8 +104,7 @@ def iterate(
             return guess, ExitStatus.MAX_ITER
 
         # evaluate the function
-        # args[0] contains data
-        func = func_eval(guess, args[0])
+        func = func_eval(guess, args["data"])
 
         # check the convergence
         status = check_convergence(
@@ -111,14 +124,13 @@ def iterate(
         iter += 1
 
         # calculate a new candidate
-        # args[0] contains data
         guess, status = step_eval(
             prev_guess,
             prev_func,
             func_eval,
             jacob_eval,
             norm_eval,
-            args[0],
+            args,
         )
 
         if not status:
