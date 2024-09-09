@@ -99,7 +99,7 @@ def _backtracking_line_search(
         )
 
         # calculate the decrease
-        decrease = _np.dot(prev_grad, unit_step)
+        decrease = c * step_size * _np.dot(prev_grad, unit_step)
 
         # calculate the norms
         new_func_norm = norm_eval(new_func)
@@ -107,8 +107,7 @@ def _backtracking_line_search(
 
         # check the Armijo (sufficient decrease) condition
         # if not met, update the step size
-        if new_func_norm <= prev_func_norm \
-            + c * step_size * decrease_norm:
+        if new_func_norm <= prev_func_norm + decrease_norm:
             return step_size, True
         step_size *= beta
 
