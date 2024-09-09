@@ -18,10 +18,10 @@ if TYPE_CHECKING:
         Sequence,
     )
 
-STEP_TOL = 1e-4
-FUNC_TOL = 1e-4
-MAX_ITER = 1000
-NORM_ORDER = None
+_STEP_TOL = 1e-4
+_FUNC_TOL = 1e-4
+_MAX_ITER = 1000
+_NORM_ORDER = None
 
 ArrayType = _np.ndarray
 SparseArrayType = _sp.sparse.spmatrix
@@ -43,28 +43,6 @@ class ExitStatus(_en.Enum):
     INVALID = _en.auto()
 
 
-def check_convergence(
-    guess,
-    prev_guess,
-    func,
-    step_tolerance,
-    func_tolerance,
-    norm_eval,
-) -> bool:
-    """
-    """
-
-    # compute the norm of func
-    norm_func = norm_eval(func)
-
-    # compute the step size norm
-    step_size = norm_eval(guess - prev_guess)
-
-    # check the convergence conditions
-    if norm_func < func_tolerance and step_size < step_tolerance:
-        return True
-
-
 def iterate(
     func_eval: FuncEvalType,
     jacob_eval: JacobEvalType,
@@ -81,24 +59,24 @@ def iterate(
 
     # tolerance setting
     step_tolerance = settings.get("step_tolerance") \
-        if settings.get("step_tolerance") is not None else STEP_TOL
+        if settings.get("step_tolerance") is not None else _STEP_TOL
     func_tolerance = settings.get("func_tolerance") \
-        if settings.get("func_tolerance") is not None else FUNC_TOL
+        if settings.get("func_tolerance") is not None else _FUNC_TOL
 
     # tolerance setting
     iter = 0
     max_iter = settings.get("max_iterations") \
-        if settings.get("max_iterations") is not None else MAX_ITER
+        if settings.get("max_iterations") is not None else _MAX_ITER
 
     # norm order setting
     norm_order = settings.get("norm_order") \
-        if settings.get("norm_order") is not None else NORM_ORDER
+        if settings.get("norm_order") is not None else _NORM_ORDER
     norm_eval = _ft.partial(
         _sp.linalg.norm,
         ord=norm_order,
     )
 
-    while iter <= max_iter:
+    while True:
         # check current step
         if iter == max_iter:
             return guess, ExitStatus.MAX_ITER
@@ -107,7 +85,7 @@ def iterate(
         func = func_eval(guess, args["data"])
 
         # check the convergence
-        status = check_convergence(
+        status = _check_convergence(
             guess,
             prev_guess,
             func,
@@ -135,3 +113,25 @@ def iterate(
 
         if not status:
             return guess, ExitStatus.INVALID
+
+
+def _check_convergence(
+    guess,
+    prev_guess,
+    func,
+    step_tolerance,
+    func_tolerance,
+    norm_eval,
+) -> bool:
+    """
+    """
+
+    # calculate the norm of func
+    norm_func = norm_eval(func)
+
+    # calculate the step size norm
+    step_size = norm_eval(guess - prev_guess)
+
+    # check the convergence conditions
+    if norm_func < func_tolerance and step_size < step_tolerance:
+        return True
