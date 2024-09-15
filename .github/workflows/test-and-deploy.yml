@@ -13,7 +13,7 @@ jobs:
           fetch-depth: 0
           ref: develop
           path: ./neqs-package
-          token: ${{ secrets.IRISPIE_CONTENTS_TOKEN }}
+          token: ${{ secrets.WORKFLOW_TOKEN }}
 
       - name: Set up identity
         run: |
