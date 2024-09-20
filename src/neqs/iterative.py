@@ -59,9 +59,9 @@ class ExitStatus(_en.Enum, ):
     #[
 
     SUCCESS = 0, "Successfully completed",
-    MAX_ITERATIONS = _en.auto(), "Maximum number of iterations reached",
-    CANNOT_MAKE_FURTHER_PROGRESS = _en.auto(), "Cannot make further progress",
-    ERROR_EVALUATING_STEP = _en.auto(), "Error when evaluating the next step",
+    MAX_ITERATIONS = 1, "Maximum number of iterations reached",
+    CANNOT_MAKE_FURTHER_PROGRESS = 2, "Cannot make further progress",
+    ERROR_EVALUATING_STEP = 3, "Error when evaluating the next step",
 
     @property
     def is_success(self, ) -> bool:
