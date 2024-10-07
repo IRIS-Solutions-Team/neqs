@@ -44,7 +44,7 @@ GuessType = dict[str, Any]
 
 
 _DEFAULT_ITER_PRINTER_COLUMNS = (
-    "state",
+    "counter",
     "func_norm",
     "step_length",
     "jacob_status",
@@ -83,6 +83,7 @@ def iterate(
     eval_jacob: JacobEvalType,
     init_guess: ArrayType,
     iter_printer: IterPrinter | None = None,
+    iter_printer_settings: dict | None = None,
     args: tuple[Any, ...] = (),
     **kwargs,
 ) -> tuple[GuessType, ExitStatus]:
@@ -121,7 +122,7 @@ def iterate(
             jacob = None
         state["jacob_status"] = jacob is None
         if state["jacob_status"]:
-            state["jacob_eval"]+= 1
+            state["jacob_eval"] += 1
             jacob = eval_jacob(guess, *args, )
         return jacob
 
