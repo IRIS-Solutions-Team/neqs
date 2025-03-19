@@ -62,10 +62,11 @@ class ExitStatus(_en.Enum, ):
     MAX_ITERATIONS = 1, "Maximum number of iterations reached",
     CANNOT_MAKE_FURTHER_PROGRESS = 2, "Cannot make further progress",
     ERROR_EVALUATING_STEP = 3, "Error when evaluating the next step",
+    NO_SOLVER_NEEDED = -1, "No solver needed",
 
     @property
     def is_success(self, ) -> bool:
-        return self.value[0] == 0
+        return self.value[0] <= 0
 
     def int(self, ) -> int:
         return self.value[0]
@@ -134,7 +135,9 @@ def iterate(
     curr_guess = init_guess
     prev_guess = curr_guess
     curr_func = _eval_func(curr_guess, )
-    curr_step = None
+    if not _np.isfinite(curr_func).all():
+        raise Exception
+    curr_step_size = None
     curr_jacob = None
 
     while True:
@@ -144,7 +147,7 @@ def iterate(
             guess=curr_guess,
             func=curr_func,
             jacob_status=state["jacob_status"],
-            step_length=curr_step,
+            step_length=curr_step_size,
         )
 
         convergence_status = _check_convergence(
@@ -168,7 +171,7 @@ def iterate(
         prev_guess = curr_guess.copy()
 
         try:
-            curr_guess, curr_func, curr_step, = eval_step(
+            curr_guess, curr_func, curr_step_size, = eval_step(
                 guess=curr_guess,
                 func=curr_func,
                 jacob=curr_jacob,
@@ -179,7 +182,7 @@ def iterate(
         except StepFailure as exception:
             exit_status = ExitStatus.CANNOT_MAKE_FURTHER_PROGRESS
             break
-        except StepFailure as exception:
+        except Exception as exception:
             exit_status = ExitStatus.ERROR_EVALUATING_STEP
             break
 
@@ -210,8 +213,10 @@ def _check_convergence(
 ) -> bool:
     """
     """
-    step_norm = eval_norm(curr_guess - prev_guess)
+    #[
     func_tolerance_satisfied = curr_norm < func_tolerance
+    step_norm = eval_norm(curr_guess - prev_guess)
     step_tolerance_satisfied = step_norm < step_tolerance
     return func_tolerance_satisfied and step_tolerance_satisfied
+    #]
 

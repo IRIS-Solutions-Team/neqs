@@ -28,6 +28,7 @@ _LEN_CONTINUATION_SYMBOL = len(_CONTINUATION_SYMBOL)
 _DEFAULT_PRINT_EVERY = 5
 _DEFAULT_NORM_ORDER = 2
 _ROUND_FOR_PRINT = 99
+_WIDTH_EXPONENT = 4
 
 
 _DEFAULT_COLUMNS = (
@@ -165,7 +166,6 @@ class FuncNormColumn:
 
     _HEADER_SYMBOL = "‖ƒ‖"
     _WIDTH_DECIMALS = 5
-    _WIDTH_EXPONENT = 4
     _WIDTH = 2 + _WIDTH_DECIMALS + _WIDTH_EXPONENT
 
     def __init__(self, **kwargs, ) -> None:
@@ -193,7 +193,7 @@ class StepLengthColumn:
 
     _HEADER_SYMBOL = "[→]"
     _WIDTH_DECIMALS = 4
-    _WIDTH = 2 + _WIDTH_DECIMALS
+    _WIDTH = 2 + _WIDTH_DECIMALS + _WIDTH_EXPONENT
 
     def __init__(self, **kwargs, ) -> None:
         self._step_length = None
@@ -211,7 +211,7 @@ class StepLengthColumn:
         if self._step_length is None:
             return f"{_NONE_SYMBOL:>{self._WIDTH}}"
         value_to_print = round(self._step_length, _ROUND_FOR_PRINT, )
-        return f"{value_to_print:.{self._WIDTH_DECIMALS}f}"
+        return f"{value_to_print:.{self._WIDTH_DECIMALS}e}"
 
     #]
 
@@ -220,7 +220,7 @@ class JacobStatusColumn:
     #[
 
     _HEADER_SYMBOL = "∇ƒ"
-    _STATUS_SYMBOL = {True: "√", False: "×"}
+    _STATUS_SYMBOL = {True: "√", False: "×", None: "×", }
     _WIDTH = 2
 
     def __init__(self, **kwargs, ) -> None:
@@ -251,7 +251,6 @@ class _WorstColumn:
     _JOIN_SYMBOL = " "
     _WIDTH_JOIN_SYMBOL = len(_JOIN_SYMBOL)
     _WIDTH_DECIMALS = 5
-    _WIDTH_EXPONENT = 4
     _WIDTH_NUMERIC = 2 + _WIDTH_DECIMALS + _WIDTH_EXPONENT
 
     def __init__(self, **kwargs, ) -> None:
