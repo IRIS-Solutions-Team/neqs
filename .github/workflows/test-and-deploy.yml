@@ -13,7 +13,8 @@ jobs:
           fetch-depth: 0
           ref: develop
           path: ./neqs-package
-          token: ${{ secrets.WORKFLOW_TOKEN }}
+          token: ${{ secrets.ACTIONS_TOKEN_2025 }}
+          repository: IRIS-Solutions-Team/neqs
 
       - name: Set up identity
         run: |
