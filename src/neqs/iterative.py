@@ -24,7 +24,7 @@ _DEFAULT_SOLVER_SETTINGS = {
     "step_tolerance": 1e-12,
     "func_tolerance": 1e-12,
     "max_iterations": 5_000,
-    "norm_order": None,
+    "norm_order": float("inf"),
     "eval_jacob_every": 1,
     "eval_jacob_last": None,
 }
@@ -132,6 +132,7 @@ def iterate(
         ord=solver_settings["norm_order"],
     )
 
+
     curr_guess = init_guess
     prev_guess = curr_guess
     curr_func = _eval_func(curr_guess, )
@@ -140,9 +141,11 @@ def iterate(
     curr_step_size = None
     curr_jacob = None
 
+
     while True:
 
         curr_norm = eval_norm(curr_func, )
+
         iter_printer.next(
             guess=curr_guess,
             func=curr_func,

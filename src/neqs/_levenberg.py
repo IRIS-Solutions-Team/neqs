@@ -8,6 +8,7 @@ Damped Newton step
 import numpy as _np
 import scipy as _sp
 import warnings as _wa
+import functools as _ft
 from numbers import Real
 
 from . import iterative as _iterative
@@ -21,10 +22,25 @@ if TYPE_CHECKING:
 #]
 
 
-_INITIAL_KAPPA = 1e-10
-_UPSCALING = 10
+_INITIAL_KAPPA = 1e-12
+_KAPPA_MULTIPLIER = 100 # 10
 _KAPPA_CAP = 1e8
 _MIN_IMPROVEMENT_RATE = 0
+_MIN_NORM_MULTIPLIER = 1.2
+
+# ===Matlab===
+# _MIN_KAPPA = 1 % 1e-2
+# _MAX_KAPPA = 1e6
+# _KAPPA_MULTIPLIER = 100
+# _INCLUDE_PURE_NEWTON = True
+
+calculate_max_sv = _ft.partial(
+    _sp.sparse.linalg.svds,
+    k=1,
+    return_singular_vectors=False,
+)
+eye = _np.eye
+diag = _np.diag
 
 
 def eval_step(
@@ -40,6 +56,7 @@ def eval_step(
     """
     """
 
+    min_norm = _MIN_NORM_MULTIPLIER * norm
     # solve = _sp.sparse.linalg.spsolve
     # eye = _sp.sparse.eye
     # diag = _sp.sparse.diags
@@ -48,11 +65,18 @@ def eval_step(
     def lstsq(*args):
         return _sp.linalg.lstsq(*args)[0]
 
-    eye = _np.eye
-    diag = _np.diag
-
     newton = jacob.T @ jacob
+
+    # num_unknowns = jacob.shape[1]
+    # if num_unknowns <= 2:
+    #     gradient_scale = 1
+    # else:
+    #     max_sv = calculate_max_sv(jacob, )
+    #     gradient_scale = num_unknowns * _np.spacing(max_sv);
+    # gradient = gradient_scale * eye(newton.shape[0], )
+
     gradient = eye(newton.shape[0], )
+
     B = -jacob.T @ func
 
     def _calculate_direction(kappa, ):
@@ -73,24 +97,44 @@ def eval_step(
         return new_guess, new_func, kappa, new_norm,
 
     def _update_kappa(kappa, ):
-        return (
-            kappa * _UPSCALING if kappa
-            else _INITIAL_KAPPA
-        )
+        if kappa:
+            return kappa * _KAPPA_MULTIPLIER
+        else:
+            return _INITIAL_KAPPA
 
+    last_successful_candidate = None
+    last_successful_norm = None
+    last_successful_kappa = None
     kappa = 0
     while kappa < _KAPPA_CAP:
         *candidate, new_norm = _calculate_candidate(kappa, )
-        if new_norm < norm:
-            return candidate
+
+        if last_successful_candidate is not None and new_norm >= last_successful_norm:
+            break
+
+        if last_successful_candidate is None:
+            if new_norm < min_norm:
+                last_successful_candidate = candidate
+                last_successful_norm = new_norm
+                last_successful_kappa = kappa
+                break
+
+        else:
+            last_successful_candidate = candidate
+            last_successful_norm = new_norm
+            last_successful_kappa = kappa
+
         kappa = _update_kappa(kappa, )
 
-    # Fall back to pure gradient step
+    if last_successful_candidate is not None:
+        return last_successful_candidate
+
+    # Fall back to a pure gradient step
     direction = B
     new_guess, new_func, new_step_size, = damped_search(
         direction=direction,
         prev_guess=guess,
-        min_norm=norm,
+        min_norm=min_norm,
         eval_func=eval_func,
         eval_norm=eval_norm,
     )
